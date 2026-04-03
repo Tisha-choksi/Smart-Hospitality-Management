@@ -1,63 +1,44 @@
-# Dependencies
-node_modules/
-__pycache__/
-*.pyc
-.venv/
-venv/
-
 # Environment
 .env
 .env.local
-.env.production
+.env.*.local
 
-# Build
-.next/
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.yarn/cache
 dist/
 build/
-.vercel/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Docker persistent data
-docker-data/
-
-# OS
+*~
 .DS_Store
-Thumbs.db
-desktop.ini
+
+# Docker
+.dockerignore
+
+# n8n
+n8n/credentials/
+n8n/data/
 
 # Logs
-*.log
 logs/
-
-# n8n credentials
-n8n/credentials/
-
-# ChromaDB local data
-chroma-data/
-
-# Coverage
-coverage/
-.nyc_output/
-
-# Prisma
-backend/prisma/*.db
-backend/prisma/*.db-journal
-
-# Python
-*.egg-info/
-.eggs/
-*.egg
-
-# Misc
-*.tgz
-*.gz
-
-# Artifact docs (generated)
-/free_stack_guide.md
-/implementation_plan.md
-/phase1_plan.md
+*.log
