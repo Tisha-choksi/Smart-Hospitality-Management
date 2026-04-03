@@ -2,14 +2,18 @@
 .env
 .env.local
 .env.*.local
+.env.production.local
 
 # Node
 node_modules/
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .yarn/cache
 dist/
 build/
+.next/
+out/
 
 # Python
 __pycache__/
@@ -19,10 +23,13 @@ __pycache__/
 .Python
 env/
 venv/
+ENV/
 .venv
 pip-log.txt
 pip-delete-this-directory.txt
 .pytest_cache/
+.coverage
+htmlcov/
 
 # IDE
 .vscode/
@@ -31,6 +38,7 @@ pip-delete-this-directory.txt
 *.swo
 *~
 .DS_Store
+*.iml
 
 # Docker
 .dockerignore
@@ -42,3 +50,10 @@ n8n/data/
 # Logs
 logs/
 *.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/migrations/
