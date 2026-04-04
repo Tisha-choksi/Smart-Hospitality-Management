@@ -21,7 +21,7 @@ chromadb==0.4.22
 # ==========================================
 # SENTIMENT ANALYSIS
 # ==========================================
-vader-sentiment==3.2.1
+vaderSentiment==3.2.1.1
 transformers==4.35.2
 torch==2.1.2
 
