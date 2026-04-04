@@ -1,0 +1,63 @@
+name: Deploy Backend & AI to Render
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'ai-services/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  # ==========================================
+  # BACKEND DEPLOYMENT
+  # ==========================================
+  deploy-backend:
+    name: Deploy Backend to Render
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Trigger Render deployment
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }} \
+            -H 'Content-Type: application/json' \
+            -d '{"commit_message": "Auto-deploy from GitHub"}'
+        if: secrets.RENDER_DEPLOY_HOOK_BACKEND != ''
+
+  # ==========================================
+  # AI SERVICES DEPLOYMENT
+  # ==========================================
+  deploy-ai:
+    name: Deploy AI Services to Render
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Trigger Render deployment
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_AI }} \
+            -H 'Content-Type: application/json' \
+            -d '{"commit_message": "Auto-deploy from GitHub"}'
+        if: secrets.RENDER_DEPLOY_HOOK_AI != ''
+
+# ==========================================
+# SETUP INSTRUCTIONS
+# ==========================================
+# 1. Create Render services:
+#    - Backend service (Node.js)
+#    - AI services (Python)
+# 
+# 2. Get deploy hooks:
+#    - Settings → Deploy → Create Manual Deploy Hook
+#    - Copy the webhook URL
+# 
+# 3. Add GitHub secrets (Settings → Secrets → Actions):
+#    - RENDER_DEPLOY_HOOK_BACKEND: Backend webhook URL
+#    - RENDER_DEPLOY_HOOK_AI: AI services webhook URL
+# 
+# 4. Push to main branch to auto-deploy

@@ -1,197 +1,163 @@
 @echo off
 REM ==========================================
-REM Smart Hospitality Management Setup Script
+REM FIX SCRIPT FOR WINDOWS SETUP ISSUES
 REM ==========================================
-REM Run from project root: setup.bat
+REM Run this to fix the setup errors
 
 setlocal enabledelayedexpansion
 
 echo.
-echo 🏨 Setting up Smart Hospitality Management System...
+echo 🔧 Fixing Smart Hospitality Setup Issues...
 echo ==================================================
 echo.
 
 REM ==========================================
-REM STEP 1: Create directory structure
+REM FIX 1: BACKEND PACKAGE.JSON
 REM ==========================================
-echo [1/6] Creating directory structure...
+echo [1/3] Fixing backend package.json...
 
-mkdir frontend\app\auth
-mkdir frontend\app\guest
-mkdir frontend\app\staff
-mkdir frontend\app\admin
-mkdir frontend\components\ui
-mkdir frontend\components\chat
-mkdir frontend\components\dashboard
-mkdir frontend\components\common
-mkdir frontend\lib
-mkdir frontend\public
-mkdir frontend\styles
-mkdir frontend\tests
+REM Delete corrupted file
+if exist backend\package.json (
+  del backend\package.json
+  echo ✓ Removed corrupted package.json
+)
 
-mkdir backend\src\config
-mkdir backend\src\middleware
-mkdir backend\src\routes
-mkdir backend\src\controllers
-mkdir backend\src\services
-mkdir backend\src\utils
-mkdir backend\src\types
-mkdir backend\src\db
-mkdir backend\prisma
-mkdir backend\tests\unit
-mkdir backend\tests\integration
+REM Create new package.json
+(
+  echo {
+  echo   "name": "smart-hospitality-backend",
+  echo   "version": "1.0.0",
+  echo   "description": "Express.js backend for Smart Hospitality Management",
+  echo   "private": true,
+  echo   "main": "dist/index.js",
+  echo   "type": "commonjs",
+  echo   "scripts": {
+  echo     "dev": "tsx watch src/index.ts",
+  echo     "build": "tsc",
+  echo     "start": "node dist/index.js",
+  echo     "lint": "eslint src --ext .ts,.tsx",
+  echo     "format:check": "prettier --check \"src/**/*.ts\"",
+  echo     "format": "prettier --write \"src/**/*.ts\"",
+  echo     "test": "jest",
+  echo     "test:watch": "jest --watch",
+  echo     "db:migrate": "prisma migrate dev",
+  echo     "db:seed": "node dist/prisma/seed.js",
+  echo     "db:reset": "prisma migrate reset"
+  echo   },
+  echo   "dependencies": {
+  echo     "express": "^4.18.2",
+  echo     "cors": "^2.8.5",
+  echo     "dotenv": "^16.3.1",
+  echo     "@prisma/client": "^5.7.0",
+  echo     "axios": "^1.6.0",
+  echo     "@supabase/supabase-js": "^2.39.0",
+  echo     "jsonwebtoken": "^9.1.2",
+  echo     "bcryptjs": "^2.4.3",
+  echo     "morgan": "^1.10.0",
+  echo     "helmet": "^7.1.0",
+  echo     "express-validator": "^7.0.0",
+  echo     "uuid": "^9.0.1"
+  echo   },
+  echo   "devDependencies": {
+  echo     "@types/express": "^4.17.21",
+  echo     "@types/node": "^20",
+  echo     "@types/cors": "^2.8.17",
+  echo     "@types/jsonwebtoken": "^9.0.7",
+  echo     "@types/bcryptjs": "^2.4.6",
+  echo     "typescript": "^5",
+  echo     "tsx": "^4.7.0",
+  echo     "ts-node": "^10.9.2",
+  echo     "prisma": "^5.7.0",
+  echo     "eslint": "^8",
+  echo     "@typescript-eslint/eslint-plugin": "^6.17.0",
+  echo     "@typescript-eslint/parser": "^6.17.0",
+  echo     "prettier": "^3.0.0",
+  echo     "jest": "^29.7.0",
+  echo     "@types/jest": "^29.5.11",
+  echo     "ts-jest": "^29.1.1",
+  echo     "supertest": "^6.3.3",
+  echo     "@types/supertest": "^6.0.2"
+  echo   }
+  echo }
+) > backend\package.json
 
-mkdir ai-services\app\routers
-mkdir ai-services\app\services
-mkdir ai-services\app\models
-mkdir ai-services\app\utils
-mkdir ai-services\tests
-mkdir ai-services\chroma-data
-
-mkdir .github\workflows
-
-echo ✓ Directories created
+echo ✓ Created new backend package.json
 echo.
 
 REM ==========================================
-REM STEP 2: Create .env file from example
+REM FIX 2: INSTALL BACKEND DEPENDENCIES
 REM ==========================================
-echo [2/6] Setting up environment variables...
-
-if not exist ".env" (
-  copy ".env.example" ".env"
-  echo ✓ Created .env from .env.example
-  echo ⚠️  Please edit .env with your API keys
-) else (
-  echo ✓ .env already exists ^(not overwriting^)
-)
-echo.
-
-REM ==========================================
-REM STEP 3: Install frontend dependencies
-REM ==========================================
-echo [3/6] Installing frontend dependencies...
-
-if exist "frontend\package.json" (
-  cd frontend
-  call npm install
-  cd ..
-  echo ✓ Frontend dependencies installed
-) else (
-  echo ⚠️  frontend\package.json not found
-)
-echo.
-
-REM ==========================================
-REM STEP 4: Install backend dependencies
-REM ==========================================
-echo [4/6] Installing backend dependencies...
-
-if exist "backend\package.json" (
-  cd backend
-  call npm install
-  cd ..
-  echo ✓ Backend dependencies installed
-) else (
-  echo ⚠️  backend\package.json not found
-)
-echo.
-
-REM ==========================================
-REM STEP 5: Setup Python environment
-REM ==========================================
-echo [5/6] Setting up Python environment...
-
-cd ai-services
-
-if not exist "venv" (
-  python -m venv venv
-  echo ✓ Virtual environment created
-) else (
-  echo ✓ Virtual environment already exists
-)
-
-call venv\Scripts\activate.bat
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-call venv\Scripts\deactivate.bat
-
-echo ✓ Python dependencies installed
+echo [2/3] Installing backend dependencies...
+cd backend
+call npm install
 cd ..
+echo ✓ Backend dependencies installed
 echo.
 
 REM ==========================================
-REM STEP 6: Initialize Git
+REM FIX 3: PYTHON SETUP
 REM ==========================================
-echo [6/6] Initializing Git repository...
+echo [3/3] Checking Python installation...
+python --version >nul 2>&1
 
-if not exist ".git" (
-  call git init
-  call git add .
-  call git commit -m "Initial commit: Project scaffold"
-  echo ✓ Git repository initialized
+if %errorlevel% neq 0 (
+  echo.
+  echo ⚠️  Python is not installed or not in PATH
+  echo.
+  echo 📥 To fix this:
+  echo    1. Download Python from: https://www.python.org/downloads/
+  echo    2. During installation, CHECK "Add Python to PATH"
+  echo    3. Click "Install Now"
+  echo    4. After installation, restart this command prompt
+  echo    5. Run this script again
+  echo.
+  pause
+  exit /b 1
 ) else (
-  echo ✓ Git repository already exists
+  echo ✓ Python is installed
+  echo.
+  
+  REM Create venv
+  echo Creating Python virtual environment...
+  cd ai-services
+  
+  if not exist venv (
+    python -m venv venv
+    echo ✓ Virtual environment created
+  )
+  
+  REM Activate and install
+  call venv\Scripts\activate.bat
+  python -m pip install --upgrade pip
+  pip install -r requirements.txt
+  call venv\Scripts\deactivate.bat
+  
+  cd ..
+  echo ✓ Python dependencies installed
 )
-echo.
 
-REM ==========================================
-REM STEP 7: Display next steps
-REM ==========================================
 echo.
-echo ╔════════════════════════════════════════╗
-echo ║   Setup Complete! 🎉                  ║
-echo ╚════════════════════════════════════════╝
+echo ==========================================
+echo ✅ All fixes completed!
+echo ==========================================
 echo.
-
-echo 📋 Next steps:
+echo 📝 Next steps:
 echo.
-echo 1️⃣  Edit .env with your API keys:
-echo    - SUPABASE_URL ^& keys ^(from supabase.com^)
-echo    - GROQ_API_KEY ^(from console.groq.com^)
-echo    - GEMINI_API_KEY ^(from aistudio.google.com^)
-echo    - UPSTASH_REDIS_URL ^& token
-echo    - RESEND_API_KEY
+echo 1. Edit .env with your API keys
 echo.
-
-echo 2️⃣  Setup database ^(after configuring .env^):
+echo 2. Setup database:
 echo    cd backend
 echo    npm run db:migrate
 echo    npm run db:seed
 echo    cd ..
 echo.
-
-echo 3️⃣  Start development servers:
+echo 3. Start all services:
 echo    npm run dev
 echo.
-echo    This will start:
+echo Services will run at:
 echo    - Frontend: http://localhost:3000
 echo    - Backend: http://localhost:3000/api
 echo    - AI Services: http://localhost:8001
-echo    - API Docs: http://localhost:8001/docs
-echo.
-
-echo 4️⃣  Individual server startup:
-echo    npm run dev:frontend    # Next.js frontend
-echo    npm run dev:backend     # Express API
-echo    npm run dev:ai          # FastAPI + Python
-echo.
-
-echo 📖 Documentation:
-echo    - Root: README.md
-echo    - Frontend: frontend\README.md
-echo    - Backend: backend\README.md
-echo    - AI Services: ai-services\README.md
-echo.
-
-echo 🔗 Useful links:
-echo    - Supabase Console: https://supabase.com
-echo    - Groq Console: https://console.groq.com
-echo    - Vercel Dashboard: https://vercel.com
-echo    - Render Dashboard: https://render.com
-echo.
-
-echo Happy coding! 🚀
 echo.
 
 pause
