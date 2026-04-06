@@ -7,7 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
-const guestRoutes = require('./routes/guests.routes');
+const guestRoutes = require('./routes/guest.routes');
 const staffRoutes = require('./routes/staff.routes');
 const requestRoutes = require('./routes/requests.routes');
 const feedbackRoutes = require('./routes/feedback.routes');
@@ -119,3 +119,5 @@ process.on('SIGINT', async () => {
     await prisma.$disconnect();
     process.exit(0);
 });
+
+startServer();
