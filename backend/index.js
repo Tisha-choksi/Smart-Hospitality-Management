@@ -3,7 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 require('dotenv').config();
-const { prisma } = require('./config/database');
+const { PrismaClient } = require('@prisma/client');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -22,7 +22,11 @@ const { requestLogger } = require('./utils/logger');
 // ==========================================
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.BACKEND_PORT || 3000;
+
+// Initialize Prisma Client
+const prisma = new PrismaClient();
+module.exports = { app, prisma };
 
 // ==========================================
 // MIDDLEWARE
@@ -30,7 +34,9 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: process.env.NODE_ENV === 'production'
+        ? ['https://yourdomain.com']
+        : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

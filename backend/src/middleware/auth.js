@@ -76,10 +76,14 @@ const optionalAuth = (req, res, next) => {
 // ==========================================
 
 const guestOnly = (req, res, next) => {
-    if (req.user) {
-        throw new AppError(403, 'Already authenticated');
+    try {
+        if (req.user) {
+            throw new AppError(403, 'Already authenticated');
+        }
+        next();
+    } catch (error) {
+        next(error);
     }
-    next();
 };
 
 // ==========================================

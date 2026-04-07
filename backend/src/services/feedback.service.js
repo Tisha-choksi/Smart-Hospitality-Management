@@ -1,4 +1,4 @@
-const { prisma } = require('../index');
+const { prisma } = require('../config/database');
 
 class FeedbackService {
     static async createFeedback(data) {

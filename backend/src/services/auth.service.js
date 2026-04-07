@@ -1,4 +1,4 @@
-const { prisma } = require('../index');
+const { prisma } = require('../config/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { AppError } = require('../middleware/errorHandler');
