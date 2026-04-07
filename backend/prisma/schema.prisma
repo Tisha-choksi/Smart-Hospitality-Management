@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  GUEST
+  STAFF
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(GUEST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceRequests ServiceRequest[]
+  feedback        Feedback[]
+}
+
+model ServiceRequest {
+  id          String   @id @default(uuid())
+  guestId     String
+  title       String
+  description String?
+  type        String
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  guest       User     @relation(fields: [guestId], references: [id])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  guestId   String
+  rating    Int
+  comment   String?
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  guest     User     @relation(fields: [guestId], references: [id])
+}
