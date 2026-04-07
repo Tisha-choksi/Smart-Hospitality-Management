@@ -1,0 +1,53 @@
+@media (max-width: 768px) {
+    body {
+        font-size: 0.9rem;
+    }
+
+    .navbar h1 {
+        font-size: 1.2rem;
+    }
+
+    .auth-form {
+        padding: 1.5rem;
+    }
+
+    .hero h2 {
+        font-size: 1.5rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    form {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.5rem 0;
+    }
+
+    .navbar .container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .nav-links {
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+
+    .auth-form {
+        margin: 0 1rem;
+    }
+
+    .hero h2 {
+        font-size: 1.3rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+}
