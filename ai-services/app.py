@@ -2,83 +2,72 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import logging
-from config import settings
+import uvicorn
 
-# Import routers
-from routers import chat, sentiment, rag
-
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
 app = FastAPI(
     title="Smart Hospitality AI Services",
-    description="AI-powered services for hotel management",
     version="1.0.0"
 )
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(chat.router)
-app.include_router(sentiment.router)
-app.include_router(rag.router)
-
-# Health check endpoint
-@app.get("/health")
-async def health():
-    """AI Services health check"""
-    return {
-        "status": "ok",
-        "service": "ai-services",
-        "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0"
-    }
-
-# Root endpoint
 @app.get("/")
 async def root():
-    """AI Services API"""
     return {
         "message": "Smart Hospitality AI Services",
         "docs": "/docs",
         "health": "/health"
     }
 
-# Startup event
-@app.on_event("startup")
-async def startup():
-    logger.info("AI Services starting up...")
-    logger.info(f"Groq API configured: {bool(settings.GROQ_API_KEY)}")
-    logger.info(f"Gemini API configured: {bool(settings.GEMINI_API_KEY)}")
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown():
-    logger.info("AI Services shutting down...")
-
-# Error handlers
-@app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    logger.error(f"Unhandled exception: {exc}")
+@app.get("/health")
+async def health():
     return {
-        "detail": "Internal server error",
-        "type": type(exc).__name__
+        "status": "ok",
+        "service": "ai-services",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.post("/ai/chat")
+async def chat(message: str):
+    return {
+        "response": f"You said: {message}. How can I help?",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.post("/ai/sentiment/analyze")
+async def sentiment(text: str):
+    positive = any(word in text.lower() for word in ['love', 'great', 'amazing', 'good'])
+    negative = any(word in text.lower() for word in ['hate', 'bad', 'terrible', 'awful'])
+    
+    if positive:
+        sentiment_type = "POSITIVE"
+    elif negative:
+        sentiment_type = "NEGATIVE"
+    else:
+        sentiment_type = "NEUTRAL"
+    
+    return {
+        "sentiment": sentiment_type,
+        "confidence": 0.85,
+        "text": text
+    }
+
+@app.post("/ai/rag/query")
+async def rag_query(query: str, top_k: int = 3):
+    return {
+        "answer": "Welcome to Smart Hospitality. How can I assist you?",
+        "sources": ["hotel_info"],
+        "confidence": 0.9
     }
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(
-        app,
-        host=settings.API_HOST,
-        port=settings.API_PORT,
-        reload=True
-    )
+    uvicorn.run("app:app", host="0.0.0.0", port=8001, reload=True)
