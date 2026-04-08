@@ -1,5 +1,5 @@
-const API_URL = 'http://localhost:3000/api';
-const AI_API_URL = 'http://localhost:8001';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const AI_API_URL = process.env.REACT_APP_AI_URL || 'http://localhost:8001';
 
 export async function apiCall(endpoint, method = 'GET', body = null) {
   const options = {
