@@ -17,12 +17,22 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'https://shmi.vercel.app,htt
     .map((origin) => origin.trim())
     .filter(Boolean);
 
+const isAllowedVercelPreview = (origin) => {
+    try {
+        const hostname = new URL(origin).hostname;
+        return hostname.endsWith('.vercel.app');
+    } catch {
+        return false;
+    }
+};
+
 // Middleware
 app.use(cors({
     origin(origin, callback) {
         // Allow server-to-server and curl/postman requests without an Origin header.
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
+        if (isAllowedVercelPreview(origin)) return callback(null, true);
         return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

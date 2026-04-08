@@ -1,3 +1,5 @@
+setuptools>=68.0.0
+wheel>=0.41.0
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 python-dotenv==1.0.0

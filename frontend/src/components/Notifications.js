@@ -3,6 +3,12 @@ import { useAuth } from '../contexts/AuthContext';
 import io from 'socket.io-client';
 import '../styles/notifications.css';
 
+const PROD_SOCKET_URL = 'https://shmi-backend.onrender.com';
+const DEV_SOCKET_URL = process.env.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, '')
+    : 'http://localhost:3000';
+const SOCKET_URL = process.env.NODE_ENV === 'production' ? PROD_SOCKET_URL : DEV_SOCKET_URL;
+
 function Notifications() {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
@@ -11,7 +17,7 @@ function Notifications() {
 
     useEffect(() => {
         // Connect to WebSocket
-        const newSocket = io('http://localhost:3000');
+        const newSocket = io(SOCKET_URL);
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
