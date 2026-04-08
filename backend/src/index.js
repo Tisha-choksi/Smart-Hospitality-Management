@@ -13,8 +13,23 @@ const io = socketIo(server, {
     cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
+const allowedOrigins = (process.env.CORS_ORIGINS || 'https://shmi.vercel.app,http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin(origin, callback) {
+        // Allow server-to-server and curl/postman requests without an Origin header.
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false
+}));
 app.use(express.json());
 
 // Routes
