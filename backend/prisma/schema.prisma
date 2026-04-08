@@ -7,11 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum UserRole {
-  GUEST
-  STAFF
-  ADMIN
-}
+enum UserRole { GUEST STAFF ADMIN }
 
 model User {
   id        String   @id @default(uuid())
@@ -21,9 +17,11 @@ model User {
   role      UserRole @default(GUEST)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   serviceRequests ServiceRequest[]
   feedback        Feedback[]
+  bookings        Booking[]
+  payments        Payment[]
 }
 
 model ServiceRequest {
@@ -33,9 +31,15 @@ model ServiceRequest {
   description String?
   type        String
   status      String   @default("PENDING")
+  priority    String   @default("MEDIUM")
+  completedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
   guest       User     @relation(fields: [guestId], references: [id])
+  
+  @@index([guestId])
+  @@index([status])
 }
 
 model Feedback {
@@ -44,7 +48,78 @@ model Feedback {
   rating    Int
   comment   String?
   category  String
+  sentiment String   @default("NEUTRAL")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
   guest     User     @relation(fields: [guestId], references: [id])
+  
+  @@index([guestId])
+  @@index([sentiment])
+}
+
+model Booking {
+  id          String   @id @default(uuid())
+  guestId     String
+  roomType    String
+  checkIn     DateTime
+  checkOut    DateTime
+  guests      Int
+  totalPrice  Float
+  status      String   @default("CONFIRMED")
+  specialRequests String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  guest       User     @relation(fields: [guestId], references: [id])
+  payments    Payment[]
+  
+  @@index([guestId])
+  @@index([status])
+  @@index([checkIn])
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  bookingId   String?
+  userId      String
+  amount      Float
+  currency    String   @default("USD")
+  method      String
+  status      String   @default("PENDING")
+  stripeId    String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  booking     Booking? @relation(fields: [bookingId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([bookingId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Analytics {
+  id              String   @id @default(uuid())
+  date            DateTime
+  totalRequests   Int      @default(0)
+  completedRequests Int    @default(0)
+  totalBookings   Int      @default(0)
+  totalRevenue    Float    @default(0)
+  avgRating       Float    @default(0)
+  createdAt       DateTime @default(now())
+  
+  @@index([date])
 }
