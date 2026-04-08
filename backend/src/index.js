@@ -4,6 +4,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const dotenv = require('dotenv');
 const { errorHandler, notFoundHandler } = require('./middleware');
+const { prisma } = require('./database');
 
 dotenv.config();
 
@@ -126,9 +127,39 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || process.env.BACKEND_PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🔌 WebSocket listening`);
-});
+
+async function ensureDatabaseCompatibility() {
+    try {
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "ServiceRequest"
+            ADD COLUMN IF NOT EXISTS "priority" TEXT NOT NULL DEFAULT 'MEDIUM';
+        `);
+
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "ServiceRequest"
+            ADD COLUMN IF NOT EXISTS "completedAt" TIMESTAMP(3);
+        `);
+
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "Feedback"
+            ADD COLUMN IF NOT EXISTS "sentiment" TEXT NOT NULL DEFAULT 'NEUTRAL';
+        `);
+
+        console.log('✅ Database compatibility checks applied');
+    } catch (error) {
+        console.error('⚠️ Database compatibility check failed:', error.message);
+    }
+}
+
+async function startServer() {
+    await ensureDatabaseCompatibility();
+
+    server.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`🔌 WebSocket listening`);
+    });
+}
+
+startServer();
 
 module.exports = { app, io };
