@@ -48,9 +48,16 @@ def get_groq_client():
 @app.get("/")
 async def root():
     return {
-        "message": "Smart Hospitality AI Services",
-        "docs": "/docs",
-        "health": "/health"
+        "status": "ok",
+        "service": "ai-service",
+        "message": "AI API is running",
+        "endpoints": [
+            "/health",
+            "/ai/chat",
+            "/ai/sentiment/analyze",
+            "/ai/rag/query",
+            "/docs"
+        ]
     }
 
 @app.get("/health")

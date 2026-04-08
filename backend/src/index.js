@@ -41,6 +41,32 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'backend',
+        message: 'Backend API is running',
+        endpoints: [
+            '/api/auth',
+            '/api/guests',
+            '/api/staff',
+            '/api/requests',
+            '/api/feedback',
+            '/api/analytics',
+            '/api/bookings',
+            '/api/payments',
+            '/health'
+        ]
+    });
+});
+
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'backend'
+    });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/guests', require('./routes/guests'));
