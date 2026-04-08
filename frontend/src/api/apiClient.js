@@ -1,13 +1,17 @@
 const PROD_API_URL = 'https://shmi-backend.onrender.com/api';
 const PROD_AI_URL = 'https://shmi-aiservice.onrender.com';
 
-const API_URL = process.env.NODE_ENV === 'production'
-  ? PROD_API_URL
-  : (process.env.REACT_APP_API_URL || 'http://localhost:3000/api');
+const isBrowser = typeof window !== 'undefined';
+const host = isBrowser ? window.location.hostname : '';
+const isLocalHost = host === 'localhost' || host === '127.0.0.1';
 
-const AI_API_URL = process.env.NODE_ENV === 'production'
-  ? PROD_AI_URL
-  : (process.env.REACT_APP_AI_URL || 'http://localhost:8001');
+const API_URL = isLocalHost
+  ? (process.env.REACT_APP_API_URL || 'http://localhost:3000/api')
+  : PROD_API_URL;
+
+const AI_API_URL = isLocalHost
+  ? (process.env.REACT_APP_AI_URL || 'http://localhost:8001')
+  : PROD_AI_URL;
 
 export async function apiCall(endpoint, method = 'GET', body = null) {
   const options = {
