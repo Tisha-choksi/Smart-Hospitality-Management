@@ -9,7 +9,12 @@ echo "🚀 Starting Smart Hospitality Services..."
 if [ -n "$DATABASE_URL" ]; then
   echo "📡 Running database migrations..."
   cd /app/backend
-  npx prisma migrate deploy
+  if ! npx prisma migrate deploy; then
+    echo "⚠️ prisma migrate deploy failed. Attempting prisma db push..."
+    if ! npx prisma db push; then
+      echo "⚠️ Prisma schema sync failed. Continuing startup so service can boot."
+    fi
+  fi
 fi
 
 # 2. Start AI Services in background
