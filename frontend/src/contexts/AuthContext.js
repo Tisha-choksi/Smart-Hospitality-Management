@@ -12,7 +12,13 @@ export function AuthProvider({ children }) {
         const storedUser = localStorage.getItem('user');
         if (storedToken) {
             setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            try {
+                setUser(storedUser ? JSON.parse(storedUser) : null);
+            } catch (error) {
+                console.error('Failed to parse stored user:', error);
+                localStorage.removeItem('user');
+                setUser(null);
+            }
         }
     }, []);
 

@@ -115,8 +115,7 @@ router.get('/requests', authenticateToken, asyncHandler(async (req, res) => {
 
     const metrics = await prisma.serviceRequest.groupBy({
         by: ['type', 'status'],
-        _count: { id: true },
-        _avg: { id: true }
+        _count: { id: true }
     });
 
     res.json({ data: metrics });
