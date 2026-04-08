@@ -3,7 +3,6 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const dotenv = require('dotenv');
-const proxy = require('express-http-proxy');
 
 dotenv.config();
 
@@ -41,10 +40,6 @@ app.use('/api/feedback', require('./routes/feedback'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
-
-// AI Service Proxy
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8001';
-app.use('/api/ai', proxy(AI_SERVICE_URL));
 
 // WebSocket Events
 io.on('connection', (socket) => {
