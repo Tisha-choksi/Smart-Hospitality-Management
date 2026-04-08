@@ -10,7 +10,7 @@ This repository contains three applications:
 - Backend: Node.js + Express API with Prisma and PostgreSQL
 - AI Engine: FastAPI service for chat, sentiment, and knowledge-based responses
 
-The backend and AI engine are designed to run together in one Dockerized Render service.
+The backend and AI engine can run either together in one Docker service or as separate Render services.
 
 ## Core Features
 
@@ -29,15 +29,14 @@ The backend and AI engine are designed to run together in one Dockerized Render 
 flowchart LR
     U[User Browser]
     F[React Frontend\nVercel]
-    B[Express Backend\nRender Docker Service]
-    A[FastAPI AI Engine\nSame Render Docker Service]
+    B[Express Backend\nRender Web Service]
+    A[FastAPI AI Engine\nRender Web Service]
     D[(PostgreSQL\nRender Database)]
     S[Stripe API]
 
     U --> F
     F -->|REST /api/*| B
-    F -->|REST /api/ai/*| B
-    B -->|Proxy /api/ai| A
+    F -->|REST /ai/*| A
     B --> D
     B --> S
 ```
@@ -59,16 +58,14 @@ sequenceDiagram
     Backend-->>Frontend: JWT token + profile
 
     User->>Frontend: Ask AI question
-    Frontend->>Backend: POST /api/ai/chat
-    Backend->>AI: Proxy request
-    AI-->>Backend: AI response
-    Backend-->>Frontend: AI response
+    Frontend->>AI: POST /ai/chat
+    AI-->>Frontend: AI response
 ```
 
 ## Repository Structure
 
 ```text
-ai-services/   FastAPI AI service
+ai_services/   FastAPI AI service
 backend/       Express API + Prisma
 frontend/      React application
 Dockerfile     Unified container build
@@ -89,12 +86,12 @@ render.yaml    Render Blueprint configuration
 - /api/bookings
 - /api/payments
 
-### AI Routes (via backend proxy)
+### AI Routes (direct AI service)
 
-- /api/ai/chat
-- /api/ai/sentiment/analyze
-- /api/ai/rag/query
-- /api/ai/health
+- /ai/chat
+- /ai/sentiment/analyze
+- /ai/rag/query
+- /health
 
 ## Data Model Summary
 
@@ -153,7 +150,7 @@ npm run dev
 ## 2) AI Engine
 
 ```bash
-cd ai-services
+cd ai_services
 pip install -r requirements.txt
 uvicorn app:app --host 0.0.0.0 --port 8001 --reload
 ```
@@ -176,7 +173,7 @@ docker run -p 10000:10000 --env-file .env hospitality-api
 Service endpoints:
 
 - Backend: <http://localhost:10000/api>
-- AI Proxy: <http://localhost:10000/api/ai>
+- AI Service: <http://localhost:8001>
 
 ## Deployment
 
@@ -197,13 +194,13 @@ Use Render Blueprint with render.yaml.
 
 ```bash
 REACT_APP_API_URL=https://your-render-service.onrender.com/api
-REACT_APP_AI_URL=https://your-render-service.onrender.com/api/ai
+REACT_APP_AI_URL=https://your-ai-service.onrender.com
 ```
 
 ## Health Checks
 
 - Backend auth check: GET /api/auth/me (expects 401 without token)
-- AI health check: GET /api/ai/health
+- AI health check: GET /health
 
 ## Technology Stack
 
@@ -216,6 +213,6 @@ REACT_APP_AI_URL=https://your-render-service.onrender.com/api/ai
 
 ## Notes
 
-- Backend and AI run in a single container process model using start.sh.
+- Backend and AI may run as separate Render services.
 - Prisma migrations are executed at container start when DATABASE_URL is present.
-- The backend proxies AI traffic, so frontend should always call /api/ai through the backend URL.
+- Frontend should call backend and AI service URLs independently.

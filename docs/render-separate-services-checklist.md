@@ -5,7 +5,7 @@
 - [ ] Confirm service boundaries:
   - Frontend: frontend/
   - Backend API: backend/
-  - AI Service: ai-services/
+  - AI Service: ai_services/
 - [ ] Verify backend routes and auth behavior.
 - [ ] Verify AI endpoints and health endpoint.
 - [ ] Verify frontend API client points to backend and AI base URLs.
@@ -106,7 +106,7 @@ Backend service:
 AI service:
 
 - [ ] Create Render Web Service
-- [ ] Root directory: ai-services
+- [ ] Root directory: ai_services
 - [ ] Runtime: Python
 - [ ] Build command: pip install -r requirements.txt
 - [ ] Start command: uvicorn app:app --host 0.0.0.0 --port $PORT
