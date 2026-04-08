@@ -10,7 +10,7 @@ COPY . .
 WORKDIR /app/backend
 RUN npm install
 # Generate Prisma client
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://user:pass@localhost:5432/db" npx prisma generate
 
 # --- SETUP AI SERVICES ---
 WORKDIR /app/ai-services
