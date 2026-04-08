@@ -5,7 +5,7 @@ pydantic==2.5.3
 pydantic-settings==2.1.0
 groq==0.4.2
 google-generativeai==0.3.0
-vaderSentiment==3.2.1.1
+vaderSentiment==3.3.2
 sentence-transformers==2.2.2
 chromadb==0.4.22
 numpy==1.24.3
