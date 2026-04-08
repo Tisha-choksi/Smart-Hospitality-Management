@@ -28,7 +28,10 @@ export async function apiCall(endpoint, method = 'GET', body = null) {
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, options);
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await response.json()
+      : { message: await response.text() };
 
     if (!response.ok) {
       throw new Error(data.message || 'API Error');
@@ -48,7 +51,10 @@ export async function aiCall(endpoint, method = 'POST', params = {}) {
 
   try {
     const response = await fetch(url, { method });
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await response.json()
+      : { detail: await response.text() };
 
     if (!response.ok) {
       throw new Error(data.detail || 'AI Error');

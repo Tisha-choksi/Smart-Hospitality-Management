@@ -3,6 +3,7 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const dotenv = require('dotenv');
+const { errorHandler, notFoundHandler } = require('./middleware');
 
 dotenv.config();
 
@@ -76,6 +77,9 @@ app.use('/api/feedback', require('./routes/feedback'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // WebSocket Events
 io.on('connection', (socket) => {
