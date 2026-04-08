@@ -256,6 +256,78 @@ footer {
     margin-top: 4rem;
     border-top: 1px solid #ddd;
 }
+.sentiment-analysis {
+  background: #f0f7ff;
+  border: 1px solid #667eea;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.sentiment-analysis p {
+  margin: 0.5rem 0;
+}
+
+.sentiment-analysis .positive {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.sentiment-analysis .negative {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.sentiment-analysis .neutral {
+  color: #ffc107;
+  font-weight: bold;
+}
+.welcome-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #667eea;
+  margin: 1rem 0;
+}
+
+.card .btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
 
 @media (max-width: 768px) {
     .navbar .container {

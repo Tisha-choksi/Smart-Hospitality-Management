@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from groq import Groq
 import logging
 import uvicorn
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,6 +24,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize Groq client
+groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
 @app.get("/")
 async def root():
@@ -38,36 +46,134 @@ async def health():
 
 @app.post("/ai/chat")
 async def chat(message: str):
-    return {
-        "response": f"You said: {message}. How can I help?",
-        "timestamp": datetime.now().isoformat()
-    }
+    """Chat with real Groq AI"""
+    try:
+        completion = groq_client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful hotel concierge assistant. Help guests with room service, amenities, bookings, and local recommendations. Be friendly and professional. Keep responses concise (under 100 words)."
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ],
+            temperature=0.7,
+            max_tokens=500,
+        )
+        
+        return {
+            "response": completion.choices[0].message.content,
+            "timestamp": datetime.now().isoformat(),
+            "model": "mixtral-8x7b-32768"
+        }
+    
+    except Exception as e:
+        logger.error(f"Groq error: {e}")
+        return {
+            "response": "I apologize, but I'm having trouble processing your request. Please try again.",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e)
+        }
 
 @app.post("/ai/sentiment/analyze")
 async def sentiment(text: str):
-    positive = any(word in text.lower() for word in ['love', 'great', 'amazing', 'good'])
-    negative = any(word in text.lower() for word in ['hate', 'bad', 'terrible', 'awful'])
+    """Analyze sentiment using Groq"""
+    try:
+        completion = groq_client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Analyze the sentiment of the given text. Response MUST be in this exact JSON format: {\"sentiment\": \"POSITIVE\"|\"NEGATIVE\"|\"NEUTRAL\", \"confidence\": 0.0-1.0}"
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze this text: {text}"
+                }
+            ],
+            temperature=0.3,
+            max_tokens=100,
+        )
+        
+        import json
+        response_text = completion.choices[0].message.content
+        
+        try:
+            result = json.loads(response_text)
+            return {
+                "sentiment": result.get("sentiment", "NEUTRAL"),
+                "confidence": result.get("confidence", 0.7),
+                "text": text
+            }
+        except:
+            # Fallback if JSON parsing fails
+            if "positive" in response_text.lower():
+                sentiment_type = "POSITIVE"
+            elif "negative" in response_text.lower():
+                sentiment_type = "NEGATIVE"
+            else:
+                sentiment_type = "NEUTRAL"
+            
+            return {
+                "sentiment": sentiment_type,
+                "confidence": 0.8,
+                "text": text
+            }
     
-    if positive:
-        sentiment_type = "POSITIVE"
-    elif negative:
-        sentiment_type = "NEGATIVE"
-    else:
-        sentiment_type = "NEUTRAL"
-    
-    return {
-        "sentiment": sentiment_type,
-        "confidence": 0.85,
-        "text": text
-    }
+    except Exception as e:
+        logger.error(f"Sentiment error: {e}")
+        return {
+            "sentiment": "NEUTRAL",
+            "confidence": 0.5,
+            "text": text,
+            "error": str(e)
+        }
 
 @app.post("/ai/rag/query")
 async def rag_query(query: str, top_k: int = 3):
-    return {
-        "answer": "Welcome to Smart Hospitality. How can I assist you?",
-        "sources": ["hotel_info"],
-        "confidence": 0.9
-    }
+    """Query with Groq"""
+    try:
+        knowledge = """
+        Hotel Hours: Breakfast 6:30am-10:30am, Lunch 12pm-2:30pm, Dinner 6pm-10pm
+        Check-in: 3pm, Check-out: 11am
+        Amenities: Pool, Fitness center 24/7, Restaurant, Bar, Business center
+        Free Wi-Fi in all rooms
+        Pet policy: $50/night fee
+        Parking: Free for all guests
+        """
+        
+        completion = groq_client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"You are a hotel information assistant. Use this knowledge base to answer questions:\n{knowledge}"
+                },
+                {
+                    "role": "user",
+                    "content": query
+                }
+            ],
+            temperature=0.5,
+            max_tokens=300,
+        )
+        
+        return {
+            "answer": completion.choices[0].message.content,
+            "sources": ["hotel_database"],
+            "confidence": 0.9
+        }
+    
+    except Exception as e:
+        logger.error(f"RAG error: {e}")
+        return {
+            "answer": "I couldn't find information about that. Please contact the front desk.",
+            "sources": [],
+            "error": str(e)
+        }
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8001, reload=True)
