@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: smart-hospitality-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    rootDir: backend
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres:REMOVED@db.hahttufyvqdibxvhgqkc.supabase.co:5432/postgres
+      - key: JWT_SECRET
+        value: REMOVED
+      - key: GROQ_API_KEY
+        value: REMOVED
+      - key: GEMINI_API_KEY
+        value: REMOVED
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: smart-hospitality-ai
+    env: python-3.9
+    buildCommand: cd ai-services && pip install -r requirements.txt
+    startCommand: cd ai-services && python app.py
+    pythonVersion: 3.9
+    envVars:
+      - key: GROQ_API_KEY
+        value: REMOVED
+      - key: GEMINI_API_KEY
+        value: REMOVED
