@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from groq import Groq
@@ -59,6 +59,11 @@ async def root():
             "/docs"
         ]
     }
+
+
+@app.head("/")
+async def root_head():
+    return Response(status_code=200)
 
 @app.get("/health")
 async def health():
