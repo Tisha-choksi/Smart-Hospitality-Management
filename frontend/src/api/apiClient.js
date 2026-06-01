@@ -1,5 +1,17 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
-const AI_API_URL = process.env.REACT_APP_AI_URL || 'http://localhost:8001';
+const PROD_API_URL = 'https://shmi-backend.onrender.com/api';
+const PROD_AI_URL = 'https://shmi-aiservice.onrender.com';
+
+const isBrowser = typeof window !== 'undefined';
+const host = isBrowser ? window.location.hostname : '';
+const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+
+const API_URL = isLocalHost
+  ? (process.env.REACT_APP_API_URL || 'http://localhost:3000/api')
+  : PROD_API_URL;
+
+const AI_API_URL = isLocalHost
+  ? (process.env.REACT_APP_AI_URL || 'http://localhost:8001')
+  : PROD_AI_URL;
 
 export async function apiCall(endpoint, method = 'GET', body = null) {
   const options = {
@@ -16,7 +28,10 @@ export async function apiCall(endpoint, method = 'GET', body = null) {
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, options);
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await response.json()
+      : { message: await response.text() };
 
     if (!response.ok) {
       throw new Error(data.message || 'API Error');
@@ -36,7 +51,10 @@ export async function aiCall(endpoint, method = 'POST', params = {}) {
 
   try {
     const response = await fetch(url, { method });
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await response.json()
+      : { detail: await response.text() };
 
     if (!response.ok) {
       throw new Error(data.detail || 'AI Error');

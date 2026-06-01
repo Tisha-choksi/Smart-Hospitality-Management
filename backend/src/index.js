@@ -3,6 +3,8 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const dotenv = require('dotenv');
+const { errorHandler, notFoundHandler } = require('./middleware');
+const { prisma } = require('./database');
 
 dotenv.config();
 
@@ -12,9 +14,60 @@ const io = socketIo(server, {
     cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
+const allowedOrigins = (process.env.CORS_ORIGINS || 'https://shmi.vercel.app,http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const isAllowedVercelPreview = (origin) => {
+    try {
+        const hostname = new URL(origin).hostname;
+        return hostname.endsWith('.vercel.app');
+    } catch {
+        return false;
+    }
+};
+
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin(origin, callback) {
+        // Allow server-to-server and curl/postman requests without an Origin header.
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        if (isAllowedVercelPreview(origin)) return callback(null, true);
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false
+}));
 app.use(express.json());
+
+app.get('/', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'backend',
+        message: 'Backend API is running',
+        endpoints: [
+            '/api/auth',
+            '/api/guests',
+            '/api/staff',
+            '/api/requests',
+            '/api/feedback',
+            '/api/analytics',
+            '/api/bookings',
+            '/api/payments',
+            '/health'
+        ]
+    });
+});
+
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'backend'
+    });
+});
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -25,6 +78,9 @@ app.use('/api/feedback', require('./routes/feedback'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // WebSocket Events
 io.on('connection', (socket) => {
@@ -70,10 +126,40 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.BACKEND_PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🔌 WebSocket listening`);
-});
+const PORT = process.env.PORT || process.env.BACKEND_PORT || 3000;
+
+async function ensureDatabaseCompatibility() {
+    try {
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "ServiceRequest"
+            ADD COLUMN IF NOT EXISTS "priority" TEXT NOT NULL DEFAULT 'MEDIUM';
+        `);
+
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "ServiceRequest"
+            ADD COLUMN IF NOT EXISTS "completedAt" TIMESTAMP(3);
+        `);
+
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "Feedback"
+            ADD COLUMN IF NOT EXISTS "sentiment" TEXT NOT NULL DEFAULT 'NEUTRAL';
+        `);
+
+        console.log('✅ Database compatibility checks applied');
+    } catch (error) {
+        console.error('⚠️ Database compatibility check failed:', error.message);
+    }
+}
+
+async function startServer() {
+    await ensureDatabaseCompatibility();
+
+    server.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`🔌 WebSocket listening`);
+    });
+}
+
+startServer();
 
 module.exports = { app, io };

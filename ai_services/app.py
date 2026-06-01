@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from groq import Groq
@@ -17,24 +17,53 @@ app = FastAPI(
     version="1.0.0"
 )
 
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "https://shmi.vercel.app,http://localhost:3000"
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"^https://.*\\.vercel\\.app$",
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
-# Initialize Groq client
-groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+def get_groq_client():
+    api_key = os.getenv('GROQ_API_KEY')
+    if not api_key:
+        return None
+    try:
+        return Groq(api_key=api_key)
+    except Exception as e:
+        logger.error(f"Failed to initialize Groq client: {e}")
+        return None
 
 @app.get("/")
 async def root():
     return {
-        "message": "Smart Hospitality AI Services",
-        "docs": "/docs",
-        "health": "/health"
+        "status": "ok",
+        "service": "ai-service",
+        "message": "AI API is running",
+        "endpoints": [
+            "/health",
+            "/ai/chat",
+            "/ai/sentiment/analyze",
+            "/ai/rag/query",
+            "/docs"
+        ]
     }
+
+
+@app.head("/")
+async def root_head():
+    return Response(status_code=200)
 
 @app.get("/health")
 async def health():
@@ -48,6 +77,14 @@ async def health():
 async def chat(message: str):
     """Chat with real Groq AI"""
     try:
+        groq_client = get_groq_client()
+        if not groq_client:
+            return {
+                "response": "AI service is not configured yet. Missing GROQ_API_KEY.",
+                "timestamp": datetime.now().isoformat(),
+                "error": "missing_groq_api_key"
+            }
+
         completion = groq_client.chat.completions.create(
             model="mixtral-8x7b-32768",
             messages=[
@@ -82,6 +119,15 @@ async def chat(message: str):
 async def sentiment(text: str):
     """Analyze sentiment using Groq"""
     try:
+        groq_client = get_groq_client()
+        if not groq_client:
+            return {
+                "sentiment": "NEUTRAL",
+                "confidence": 0.5,
+                "text": text,
+                "error": "missing_groq_api_key"
+            }
+
         completion = groq_client.chat.completions.create(
             model="mixtral-8x7b-32768",
             messages=[
@@ -108,7 +154,7 @@ async def sentiment(text: str):
                 "confidence": result.get("confidence", 0.7),
                 "text": text
             }
-        except:
+        except Exception:
             # Fallback if JSON parsing fails
             if "positive" in response_text.lower():
                 sentiment_type = "POSITIVE"
@@ -136,6 +182,14 @@ async def sentiment(text: str):
 async def rag_query(query: str, top_k: int = 3):
     """Query with Groq"""
     try:
+        groq_client = get_groq_client()
+        if not groq_client:
+            return {
+                "answer": "AI service is not configured yet. Missing GROQ_API_KEY.",
+                "sources": [],
+                "error": "missing_groq_api_key"
+            }
+
         knowledge = """
         Hotel Hours: Breakfast 6:30am-10:30am, Lunch 12pm-2:30pm, Dinner 6pm-10pm
         Check-in: 3pm, Check-out: 11am

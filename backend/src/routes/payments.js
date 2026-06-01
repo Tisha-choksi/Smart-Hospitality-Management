@@ -1,14 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { prisma } = require('../database');
 const emailService = require('../services/email');
 const { authenticateToken, asyncHandler } = require('../middleware');
+
+const getStripeClient = () => {
+    if (!process.env.STRIPE_SECRET_KEY) {
+        return null;
+    }
+    return require('stripe')(process.env.STRIPE_SECRET_KEY);
+};
 
 // Create payment intent
 router.post('/intent', authenticateToken, asyncHandler(async (req, res) => {
     const { amount, bookingId } = req.body;
     const userId = req.user.id;
+    const stripe = getStripeClient();
+
+    if (!stripe) {
+        return res.status(503).json({
+            error: 'Payments are not configured. Missing STRIPE_SECRET_KEY.'
+        });
+    }
 
     try {
         const paymentIntent = await stripe.paymentIntents.create({

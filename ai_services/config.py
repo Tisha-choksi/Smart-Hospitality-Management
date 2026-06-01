@@ -5,7 +5,7 @@ load_dotenv()
 
 class Settings:
     GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
     DATABASE_URL = os.getenv('DATABASE_URL')
     NODE_ENV = os.getenv('NODE_ENV', 'development')
     
