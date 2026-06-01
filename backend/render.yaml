@@ -7,13 +7,13 @@ services:
     rootDir: backend
     envVars:
       - key: DATABASE_URL
-        value: postgresql://postgres:REMOVED@db.hahttufyvqdibxvhgqkc.supabase.co:5432/postgres
+        fromDatabase: true
       - key: JWT_SECRET
-        value: REMOVED
+        fromDatabase: true
       - key: GROQ_API_KEY
-        value: REMOVED
+        fromDatabase: true
       - key: GEMINI_API_KEY
-        value: REMOVED
+        fromDatabase: true
       - key: NODE_ENV
         value: production
 
@@ -25,6 +25,6 @@ services:
     pythonVersion: 3.9
     envVars:
       - key: GROQ_API_KEY
-        value: REMOVED
+        fromDatabase: true
       - key: GEMINI_API_KEY
-        value: REMOVED
+        fromDatabase: true
