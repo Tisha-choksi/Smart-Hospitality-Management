@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Smart Hospitality Management System
 
 A comprehensive hotel management solution featuring role-based access control, AI-powered guest services, real-time notifications, and payment processing.
@@ -19,6 +20,8 @@ A comprehensive hotel management solution featuring role-based access control, A
 
 ---
 =======
+=======
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 # Smart Hospitality Management
 
 A full-stack hospitality platform for guest operations, service requests, bookings, payments, feedback analytics, and AI concierge support.
@@ -43,11 +46,15 @@ The backend and AI engine can run either together in one Docker service or as se
 - AI concierge chat
 - AI sentiment analysis
 - AI RAG-style hotel information responses
+<<<<<<< HEAD
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
+=======
 >>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 
 ## Architecture
 
 ```mermaid
+<<<<<<< HEAD
 <<<<<<< HEAD
 graph TB
     subgraph Frontend["Frontend (React)"]
@@ -420,6 +427,8 @@ erDiagram
 
 ### Backend Setup
 =======
+=======
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 flowchart LR
     U[User Browser]
     F[React Frontend\nVercel]
@@ -533,11 +542,15 @@ erDiagram
 ## Local Development
 
 ## 1) Backend
+<<<<<<< HEAD
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
+=======
 >>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 
 ```bash
 cd backend
 npm install
+<<<<<<< HEAD
 <<<<<<< HEAD
 npx prisma migrate dev
 npm run db:seed
@@ -546,6 +559,8 @@ npm run dev
 
 ### Frontend Setup
 =======
+=======
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 npx prisma generate
 npm run dev
 ```
@@ -559,6 +574,9 @@ uvicorn app:app --host 0.0.0.0 --port 8001 --reload
 ```
 
 ## 3) Frontend
+<<<<<<< HEAD
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
+=======
 >>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 
 ```bash
@@ -567,6 +585,7 @@ npm install
 npm start
 ```
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 ### AI Services Setup
 
@@ -617,6 +636,8 @@ DATABASE_URL=postgresql://...
 | Staff | staff@hotel.com | Staff@123 |
 | Guest | guest@hotel.com | Guest@123 |
 =======
+=======
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
 ## Docker Local Run
 
 ```bash
@@ -670,4 +691,7 @@ REACT_APP_AI_URL=https://your-ai-service.onrender.com
 - Backend and AI may run as separate Render services.
 - Prisma migrations are executed at container start when DATABASE_URL is present.
 - Frontend should call backend and AI service URLs independently.
+<<<<<<< HEAD
+>>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
+=======
 >>>>>>> 00540ec66237dddedcc826dbcb462673f0092f7f
