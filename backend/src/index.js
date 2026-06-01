@@ -4,7 +4,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const dotenv = require('dotenv');
 const { errorHandler, notFoundHandler } = require('./middleware');
-const { prisma } = require('./database');
+const { authLimiter, paymentLimiter, generalLimiter } = require('./rateLimiter');
 
 dotenv.config();
 
@@ -42,6 +42,11 @@ app.use(cors({
     credentials: false
 }));
 app.use(express.json());
+
+// Rate limiting
+app.use('/api/auth', authLimiter);
+app.use('/api/payments', paymentLimiter);
+app.use('/api', generalLimiter);
 
 app.get('/', (req, res) => {
     res.json({
@@ -95,9 +100,11 @@ io.on('connection', (socket) => {
         socket.join(`user-${userId}`);
     });
 
-    // Listen for request updates
+    let notificationIdCounter = 0;
+
     socket.on('request-updated', (data) => {
         io.to(`user-${data.userId}`).emit('notification', {
+            id: `req-${++notificationIdCounter}`,
             type: 'REQUEST_UPDATED',
             title: 'Request Updated',
             message: data.message,
@@ -105,9 +112,9 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Listen for booking confirmations
     socket.on('booking-confirmed', (data) => {
         io.to(`user-${data.userId}`).emit('notification', {
+            id: `book-${++notificationIdCounter}`,
             type: 'BOOKING_CONFIRMED',
             title: 'Booking Confirmed',
             message: data.message,
@@ -115,9 +122,9 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Listen for payment notifications
     socket.on('payment-received', (data) => {
         io.to(`user-${data.userId}`).emit('notification', {
+            id: `pay-${++notificationIdCounter}`,
             type: 'PAYMENT_RECEIVED',
             title: 'Payment Received',
             message: data.message,
@@ -128,32 +135,7 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || process.env.BACKEND_PORT || 3000;
 
-async function ensureDatabaseCompatibility() {
-    try {
-        await prisma.$executeRawUnsafe(`
-            ALTER TABLE "ServiceRequest"
-            ADD COLUMN IF NOT EXISTS "priority" TEXT NOT NULL DEFAULT 'MEDIUM';
-        `);
-
-        await prisma.$executeRawUnsafe(`
-            ALTER TABLE "ServiceRequest"
-            ADD COLUMN IF NOT EXISTS "completedAt" TIMESTAMP(3);
-        `);
-
-        await prisma.$executeRawUnsafe(`
-            ALTER TABLE "Feedback"
-            ADD COLUMN IF NOT EXISTS "sentiment" TEXT NOT NULL DEFAULT 'NEUTRAL';
-        `);
-
-        console.log('✅ Database compatibility checks applied');
-    } catch (error) {
-        console.error('⚠️ Database compatibility check failed:', error.message);
-    }
-}
-
 async function startServer() {
-    await ensureDatabaseCompatibility();
-
     server.listen(PORT, () => {
         console.log(`🚀 Server running on http://localhost:${PORT}`);
         console.log(`🔌 WebSocket listening`);

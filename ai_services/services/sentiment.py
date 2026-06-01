@@ -48,7 +48,7 @@ class SentimentService:
                 "sentiment": "UNKNOWN",
                 "confidence": 0.0,
                 "scores": {},
-                "error": str(e)
+                "error": "internal_error"
             }
 
 sentiment_service = SentimentService()
