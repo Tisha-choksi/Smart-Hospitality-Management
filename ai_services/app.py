@@ -1,21 +1,28 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from datetime import datetime
 from groq import Groq
 import logging
 import uvicorn
 import os
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+limiter = Limiter(key_func=get_remote_address, default_limits=["30/minute"])
 app = FastAPI(
     title="Smart Hospitality AI Services",
     version="1.0.0"
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 allowed_origins = [
     origin.strip()
@@ -74,7 +81,8 @@ async def health():
     }
 
 @app.post("/ai/chat")
-async def chat(message: str):
+@limiter.limit("10/minute")
+async def chat(request: Request, message: str):
     """Chat with real Groq AI"""
     try:
         groq_client = get_groq_client()
@@ -112,11 +120,12 @@ async def chat(message: str):
         return {
             "response": "I apologize, but I'm having trouble processing your request. Please try again.",
             "timestamp": datetime.now().isoformat(),
-            "error": str(e)
+            "error": "internal_error"
         }
 
 @app.post("/ai/sentiment/analyze")
-async def sentiment(text: str):
+@limiter.limit("10/minute")
+async def sentiment(request: Request, text: str):
     """Analyze sentiment using Groq"""
     try:
         groq_client = get_groq_client()
@@ -175,12 +184,14 @@ async def sentiment(text: str):
             "sentiment": "NEUTRAL",
             "confidence": 0.5,
             "text": text,
-            "error": str(e)
+            "error": "internal_error"
         }
 
 @app.post("/ai/rag/query")
-async def rag_query(query: str, top_k: int = 3):
+@limiter.limit("10/minute")
+async def rag_query(request: Request, query: str, top_k: int = 3):
     """Query with Groq"""
+    top_k = max(1, min(10, top_k))
     try:
         groq_client = get_groq_client()
         if not groq_client:
@@ -226,7 +237,7 @@ async def rag_query(query: str, top_k: int = 3):
         return {
             "answer": "I couldn't find information about that. Please contact the front desk.",
             "sources": [],
-            "error": str(e)
+            "error": "internal_error"
         }
 
 if __name__ == "__main__":

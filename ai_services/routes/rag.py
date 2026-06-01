@@ -138,4 +138,7 @@ async def list_documents():
         )
 
 # Load knowledge base on startup
-load_knowledge_base()
+try:
+    load_knowledge_base()
+except Exception as e:
+    logger.error(f"Failed to load knowledge base on startup: {e}")

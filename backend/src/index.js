@@ -5,6 +5,7 @@ const socketIo = require('socket.io');
 const dotenv = require('dotenv');
 const { errorHandler, notFoundHandler } = require('./middleware');
 const { authLimiter, paymentLimiter, generalLimiter } = require('./rateLimiter');
+const logger = require('./logger');
 
 dotenv.config();
 
@@ -89,10 +90,10 @@ app.use(errorHandler);
 
 // WebSocket Events
 io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.id}`);
+    logger.info(`User connected: ${socket.id}`);
 
     socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.id}`);
+        logger.info(`User disconnected: ${socket.id}`);
     });
 
     // Join user-specific room
@@ -137,8 +138,8 @@ const PORT = process.env.PORT || process.env.BACKEND_PORT || 3000;
 
 async function startServer() {
     server.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-        console.log(`🔌 WebSocket listening`);
+        logger.info(`Server running on http://localhost:${PORT}`);
+        logger.info(`WebSocket listening`);
     });
 }
 

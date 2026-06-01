@@ -104,26 +104,3 @@ model Payment {
   @@index([status])
 }
 
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  type      String
-  title     String
-  message   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Analytics {
-  id              String   @id @default(uuid())
-  date            DateTime
-  totalRequests   Int      @default(0)
-  completedRequests Int    @default(0)
-  totalBookings   Int      @default(0)
-  totalRevenue    Float    @default(0)
-  avgRating       Float    @default(0)
-  createdAt       DateTime @default(now())
-  
-  @@index([date])
-}
