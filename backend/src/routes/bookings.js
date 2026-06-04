@@ -10,8 +10,19 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     const guestId = req.user.id;
 
     // Validate dates
-    if (new Date(checkIn) >= new Date(checkOut)) {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+        return res.status(400).json({ message: 'Invalid check-in or check-out date' });
+    }
+
+    if (checkInDate >= checkOutDate) {
         return res.status(400).json({ message: 'Check-out date must be after check-in date' });
+    }
+
+    if (checkInDate < new Date(new Date().toDateString())) {
+        return res.status(400).json({ message: 'Check-in date cannot be in the past' });
     }
 
     const booking = await prisma.booking.create({

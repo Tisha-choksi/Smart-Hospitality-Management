@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const logger = require('../logger');
 
 class EmailService {
     constructor() {
@@ -34,9 +35,9 @@ class EmailService {
 
         try {
             await this.transporter.sendMail(mailOptions);
-            console.log(`Email sent to ${email}`);
+            logger.info(`Email sent to ${email}`);
         } catch (error) {
-            console.error('Email error:', error);
+            logger.error({ message: 'Email error', error: error.message, recipient: email });
         }
     }
 
@@ -63,7 +64,7 @@ class EmailService {
         try {
             await this.transporter.sendMail(mailOptions);
         } catch (error) {
-            console.error('Email error:', error);
+            logger.error({ message: 'Email error', error: error.message, recipient: email });
         }
     }
 
@@ -93,7 +94,7 @@ class EmailService {
         try {
             await this.transporter.sendMail(mailOptions);
         } catch (error) {
-            console.error('Email error:', error);
+            logger.error({ message: 'Email error', error: error.message, recipient: email });
         }
     }
 
@@ -122,7 +123,7 @@ class EmailService {
         try {
             await this.transporter.sendMail(mailOptions);
         } catch (error) {
-            console.error('Email error:', error);
+            logger.error({ message: 'Email error', error: error.message, recipient: email });
         }
     }
 }

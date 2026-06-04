@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const logger = require('./logger');
 
 const asyncHandler = (fn) => (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
@@ -22,7 +23,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-    console.error(err);
+    logger.error({ message: err.message, stack: err.stack, path: req.path, method: req.method });
     res.status(err.status || 500).json({
         success: false,
         message: err.message || 'Internal Server Error'
